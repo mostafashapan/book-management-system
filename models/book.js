@@ -1,65 +1,53 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
-const Category = require('./category');
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
+const Category = require('./category'); // Assuming Category is another Mongoose model
 
-const Book = sequelize.define('Book', {
+const bookSchema = new Schema({
   BookId: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
+    type: Number,
+    required: true,
+    unique: true,
+    // You may want to handle auto-incrementing through a separate mechanism
   },
   Name: {
-    type: DataTypes.STRING,
-    allowNull: false
+    type: String,
+    required: true
   },
   Description: {
-    type: DataTypes.STRING,
-    allowNull: false
+    type: String,
+    required: true
   },
   Price: {
-    type: DataTypes.DECIMAL(10, 2),
-    allowNull: false,
-    validate: {
-      min: 0
-    }
+    type: Schema.Types.Decimal128,
+    required: true,
+    min: 0
   },
   Author: {
-    type: DataTypes.STRING
+    type: String
   },
   Stock: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    validate: {
-      min: 0
-    }
-  },
-  createdAt: {
-    type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW,
-    allowNull: false
-  },
-  updatedAt: {
-    type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW,
-    allowNull: false
+    type: Number,
+    required: true,
+    min: 0
   },
   CategoryId: {
-    type: DataTypes.INTEGER,
-    allowNull: false
+    type: Schema.Types.ObjectId,
+    ref: 'Category', // Reference to the Category model
+    required: true
   }
 }, {
-  hooks: {
-    beforeUpdate: (book, options) => {
-      // Only update `updatedAt` if specific fields are updated
-      if (book.changed('Name') || book.changed('Description') || book.changed('Price')) {
-        book.updatedAt = new Date();
-      }
-    }
-  }
+  timestamps: true // Automatically manage createdAt and updatedAt
 });
 
-// Define associations
-Book.belongsTo(Category, { foreignKey: 'CategoryId' });
-Category.hasMany(Book, { foreignKey: 'CategoryId' });
+// Pre-save hook to handle custom logic for updatedAt if needed
+bookSchema.pre('save', function(next) {
+  if (this.isModified('Name') || this.isModified('Description') || this.isModified('Price')) {
+    this.updatedAt = Date.now(); // Optional if timestamps is used
+  }
+  next();
+});
+
+// Create the model
+const Book = mongoose.model('Book', bookSchema);
 
 module.exports = Book;

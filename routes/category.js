@@ -1,74 +1,26 @@
 const express = require('express');
 const router = express.Router();
-const Category = require('../models/category');
+const categoryController = require('../controllers/categoryController');
 
 // GET all categories
-router.get('/', async (req, res) => {
-  try {
-    const categories = await Category.findAll();
-    res.json(categories);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+router.get('/', categoryController.getAllCategories);
+
+// GET a specific category by CategoryId
+router.get('/categoryId/:categoryId', categoryController.getCategoryByCategoryId);
 
 // GET a specific category by ID
-router.get('/:id', async (req, res) => {
-  const { id } = req.params;
-  try {
-    const category = await Category.findByPk(id);
-    if (!category) {
-      res.status(404).json({ message: 'Category not found' });
-    } else {
-      res.json(category);
-    }
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+router.get('/:id', categoryController.getCategoryById);
 
 // POST a new category
-router.post('/', async (req, res) => {
-  const newCategory = req.body;
-  try {
-    const createdCategory = await Category.create(newCategory);
-    res.status(201).json(createdCategory);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
+router.post('/', categoryController.createCategory);
 
-// PUT update an existing category
-router.put('/:id', async (req, res) => {
-  const { id } = req.params;
-  const updatedCategory = req.body;
-  try {
-    const category = await Category.findByPk(id);
-    if (!category) {
-      res.status(404).json({ message: 'Category not found' });
-    } else {
-      await category.update(updatedCategory);
-      res.json(category);
-    }
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
+// PUT update an existing category by ID
+router.put('/:id', categoryController.updateCategory);
 
-// DELETE a category
-router.delete('/:id', async (req, res) => {
-  const { id } = req.params;
-  try {
-    const category = await Category.findByPk(id);
-    if (!category) {
-      res.status(404).json({ message: 'Category not found' });
-    } else {
-      await category.destroy();
-      res.json({ message: 'Category deleted' });
-    }
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+// DELETE a category by ID
+router.delete('/:id', categoryController.deleteCategoryById);
+
+// DELETE a category by CategoryId
+router.delete('/categoryId/:categoryId', categoryController.deleteCategoryByCategoryId);
 
 module.exports = router;
