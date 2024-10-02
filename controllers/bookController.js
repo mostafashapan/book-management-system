@@ -49,6 +49,26 @@ exports.updateBook = async (req, res) => {
   }
 };
 
+exports. patchBook = async (req, res) => {
+  const { bookId } = req.params;
+  const updateFields = req.body;
+
+  try {
+    const updatedBook = await Book.findOneAndUpdate(
+      { BookId: bookId },
+      { $set: updateFields },
+      { new: true, runValidators: true } // Returns the updated document
+    );
+
+    if (!updatedBook) {
+      return res.status(404).json({ message: 'Book not found' });
+    }
+
+    res.status(200).json(updatedBook);
+  } catch (error) {
+    res.status(400).json({ message: 'Error updating book', error: error.message });
+  }
+};
 // DELETE a book
 exports.deleteBook = async (req, res) => {
   const { bookId } = req.params;

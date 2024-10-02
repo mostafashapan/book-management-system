@@ -26,7 +26,7 @@
  *           example: 10
  *         CategoryId:
  *           type: string
- *           example: "60d0fe4f5311236168a109ca" # Replace with an actual ObjectId from your Category collection
+ *           example: "60d0fe4f5311236168a109ca"
  *       required:
  *         - BookId
  *         - Name
@@ -34,6 +34,11 @@
  *         - Price
  *         - Stock
  *         - CategoryId
+ *   securitySchemes:
+ *     BearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
  */
 
 /**
@@ -49,6 +54,8 @@
  *   get:
  *     summary: Get all books
  *     tags: [Books]
+ *     security:
+ *       - BearerAuth: []  # Indicating that this endpoint requires authentication
  *     responses:
  *       200:
  *         description: A list of books
@@ -58,6 +65,8 @@
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Book'
+ *       401:
+ *         description: Unauthorized, invalid token
  *       500:
  *         description: Error fetching books.
  */
@@ -147,6 +156,58 @@
  *     responses:
  *       200:
  *         description: The book was updated successfully
+ *       404:
+ *         description: Book not found
+ *       400:
+ *         description: Invalid input
+ */
+
+/**
+ * @swagger
+ * /api/book/bookid/{bookId}:
+ *   patch:
+ *     summary: Partially update an existing book
+ *     tags: [Books]
+ *     parameters:
+ *       - in: path
+ *         name: bookId
+ *         required: true
+ *         description: The ID of the book to partially update
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               Name:
+ *                 type: string
+ *                 example: "Updated Book Name"
+ *               Description:
+ *                 type: string
+ *                 example: "This is an updated description."
+ *               Price:
+ *                 type: number
+ *                 format: float
+ *                 example: 17.99
+ *               Author:
+ *                 type: string
+ *                 example: "Updated Author Name"
+ *               Stock:
+ *                 type: integer
+ *                 example: 15
+ *               CategoryId:
+ *                 type: string
+ *                 example: "60d0fe4f5311236168a109ca"
+ *     responses:
+ *       200:
+ *         description: The book was partially updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Book'
  *       404:
  *         description: Book not found
  *       400:
